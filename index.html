@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafeco Studio | استوديو صانع المحتوى</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%231d4ed8'/><path d='M30 65 Q50 30 70 65 Z' fill='%2338bdf8'/></svg>">
+
+    <style>
+        :root {
+            --bg-dark: #07080c;
+            --card-bg: rgba(15, 18, 30, 0.85);
+            --border-color: rgba(99, 102, 241, 0.25);
+            --primary: #6366f1;
+            --primary-glow: #818cf8;
+            --accent: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Focus Studio Mode (وضع التسجيل لقراءة السكريبتات) */
+        #focusStudioOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            padding: 3rem 1.5rem;
+            color: #fff;
+            overflow-y: auto;
+        }
+
+        .focus-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+
+        .focus-content {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            font-size: 1.8rem;
+            line-height: 2.3;
+            text-align: center;
+            color: #e2e8f0;
+        }
+
+        /* --- Header --- */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(7, 8, 12, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+
+        .logo i {
+            color: var(--accent);
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+
+        nav {
+            display: flex;
+            gap: 0.3rem;
+            overflow-x: auto;
+        }
+        nav::-webkit-scrollbar { display: none; }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+        .nav-btn.active {
+            color: #fff;
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        /* --- Layout --- */
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.35s ease forwards;
+        }
+
+        .section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Hero Grid & Stats --- */
+        .hero { text-align: center; padding: 2.2rem 1rem; }
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 0.6rem;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .quick-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .quick-card i { font-size: 1.6rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 14px;
+        }
+        .stat-box h3 { font-size: 2.2rem; color: var(--accent); font-family: monospace; margin-top: 0.5rem; }
+
+        .video-card-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.8rem;
+        }
+        .video-card-item:hover { border-color: var(--accent); background: rgba(6, 182, 212, 0.05); }
+
+        footer {
+            background: rgba(7, 8, 12, 0.95);
+            border-top: 1px solid var(--border-color);
+            padding: 1.2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .social-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .social-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .social-btn.youtube:hover { background: #ff0000; border-color: #ff0000; }
+        .social-btn.whatsapp:hover { background: #25d366; border-color: #25d366; }
+        .social-btn.telegram:hover { background: #0088cc; border-color: #0088cc; }
+
+        input, textarea, select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+            z-index: 10;
+        }
+        .btn:hover { background: #4f46e5; }
+
+        @media (max-width: 600px) {
+            .logo span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Focus Studio Overlay -->
+    <div id="focusStudioOverlay">
+        <div class="focus-header">
+            <h3><i class="fa-solid fa-microphone"></i> وضع التسجيل (اختر السكريبت للقراءة)</h3>
+            <button class="btn" style="background:var(--danger);" onclick="closeFocusStudio()"><i class="fa-solid fa-xmark"></i> إغلاق (ESC)</button>
+        </div>
+        <div style="max-width: 600px; margin: 0 auto 2rem; width: 100%;">
+            <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">اختر سكريبت من بنك أفكارك:</label>
+            <select id="focusScriptSelect" onchange="loadScriptToFocus()" style="font-size: 1.1rem; padding: 0.8rem;">
+                <option value="">-- اختر سكريبت لعرضه على الشاشة --</option>
+            </select>
+        </div>
+        <div class="focus-content" id="focusScriptDisplay">
+            اختر سكريبت من القائمة بالأعلى لتبدأ التسجيل بقراءة مريحة بدون أي تشتيت...
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-rocket"></i>
+            <span>Grafeco Studio</span>
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> الرئيسية</button>
+            <button class="nav-btn" onclick="switchTab('stats')"><i class="fa-solid fa-chart-line"></i> العداد الحي</button>
+            <button class="nav-btn" onclick="switchTab('videos')"><i class="fa-solid fa-video"></i> فيديوهاتي</button>
+            <button class="nav-btn" onclick="switchTab('vault')"><i class="fa-solid fa-box-archive"></i> الأفكار</button>
+            <button class="nav-btn" onclick="openFocusStudio()" style="background: rgba(6, 182, 212, 0.2); border-color: var(--accent);"><i class="fa-solid fa-microphone"></i> وضع التسجيل</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- SECTION 1: HOME -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>استوديو صانع المحتوى الفضائي والتاريخي</h1>
+                <p>إدارة قناتك، سكريبتاتك، وفيديوهاتك بكل احترافية وبدون تشتيت.</p>
+            </div>
+            
+            <div class="quick-grid">
+                <div class="quick-card" onclick="triggerSpaceSpark()">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+                    <h3>مفجر أفكار الفضاء</h3>
+                    <p>توليد فكرة فلكية حصرية وغريبة للمقطع القادم!</p>
+                </div>
+                <div class="quick-card" onclick="switchTab('videos')">
+                    <i class="fa-solid fa-video"></i>
+                    <h3>إحصائيات الفيديوهات</h3>
+                    <p>استعرض كل فيديوهاتك وإحصائياتها التفصيلية مع خيارات الترتيب.</p>
+                </div>
+                <div class="quick-card" onclick="switchTab('stats')">
+                    <i class="fa-solid fa-users"></i>
+                    <h3>العداد الحي</h3>
+                    <p>متابعة المشتركين والمشاهدات لحظياً عبر يوتيوب.</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1.5rem;">
+                <h3><i class="fa-solid fa-database"></i> النسخ الاحتياطي السريع</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">انقل بياناتك وأفكارك بين اللابتوب والجوال بضغطة زر:</p>
+                <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="exportData()"><i class="fa-solid fa-download"></i> تصدير البيانات (JSON)</button>
+                    <label class="btn" style="background: rgba(255,255,255,0.1); cursor: pointer;">
+                        <i class="fa-solid fa-upload"></i> استيراد ملف
+                        <input type="file" id="importFile" onchange="importData(event)" style="display:none;">
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: LIVE STATS COUNTER -->
+        <section id="stats" class="section">
+            <div class="card counter-box">
+                <h2>مؤشر الأداء اللحظي لقناتك</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">بيانات قناتك مرتبطة ومحفوظة تلقائياً من يوتيوب:</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span style="color:var(--text-muted);">إجمالي المشتركين</span>
+                        <h3 id="statSubs">--</h3>
+                    </div>
+                    <div class="stat-box">
+                        <span style="color:var(--text-muted);">إجمالي المشاهدات</span>
+                        <h3 id="statViews">--</h3>
+                    </div>
+                    <div class="stat-box">
+                        <span style="color:var(--text-muted);">إجمالي اللايكات</span>
+                        <h3 id="statLikes">--</h3>
+                    </div>
+                </div>
+
+                <button class="btn" style="margin-top: 1.5rem;" onclick="fetchYouTubeData(true)"><i class="fa-solid fa-rotate"></i> تحديث البيانات الآن</button>
+            </div>
+        </section>
+
+        <!-- SECTION 3: VIDEOS HUB -->
+        <section id="videos" class="section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2><i class="fa-solid fa-film" style="color: var(--accent);"></i> مكتبة فيديوهات القناة (من يوتيوب مباشرة)</h2>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-muted);">ترتيب حسب:</label>
+                        <select id="sortSelect" onchange="sortVideos()" style="padding: 0.4rem 0.8rem; width: auto;">
+                            <option value="default">الافتراضي (الأحدث)</option>
+                            <option value="views">الأكثر مشاهدة</option>
+                            <option value="likes">الأكثر إعجاباً</option>
+                            <option value="title">الاسم (أبجدياً)</option>
+                        </select>
+                    </div>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">اضغط على أي فيديو لعرض كل إحصائياته وتفاصيله الحرفية:</p>
+                
+                <div class="items-list" id="videosListContainer">
+                    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">جاري سحب فيديوهات القناة من يوتيوب...</p>
+                </div>
+            </div>
+
+            <div class="card" id="videoDetailCard" style="display:none; border-color: var(--accent);">
+                <h3 id="detTitle" style="color: var(--accent); margin-bottom: 1rem;">عنوان الفيديو</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; text-align: center;">
+                    <div style="background:rgba(0,0,0,0.3); padding:0.8rem; border-radius:10px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">المشاهدات</span>
+                        <h4 id="detViews" style="font-size:1.4rem; color:#fff;">0</h4>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.3); padding:0.8rem; border-radius:10px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">الإعجابات</span>
+                        <h4 id="detLikes" style="font-size:1.4rem; color:#fff;">0</h4>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.3); padding:0.8rem; border-radius:10px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">التعليقات</span>
+                        <h4 id="detComments" style="font-size:1.4rem; color:#fff;">0</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: IDEA VAULT -->
+        <section id="vault" class="section">
+            <div class="card">
+                <h2>بنك الأفكار والسكريبتات</h2>
+                <div class="form-group" style="margin-bottom:0.8rem;">
+                    <label>عنوان الفكرة</label>
+                    <input type="text" id="ideaTitle" placeholder="مثال: أحداث رمضانية تاريخية...">
+                </div>
+                <div class="form-group" style="margin-bottom:0.8rem;">
+                    <label>النص / السكريبت</label>
+                    <textarea id="ideaScript" rows="3" placeholder="اكتب السكريبت هنا..."></textarea>
+                </div>
+                <button class="btn" onclick="addIdea()"><i class="fa-solid fa-plus"></i> حفظ الفكرة</button>
+            </div>
+
+            <div class="card">
+                <h3>الأفكار المحفوظة</h3>
+                <div class="items-list" id="ideasList"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Grafeco Studio &copy; 2026 - جميع الحقوق محفوظة لقناتك الفضائية والتاريخية</p>
+        <div class="social-links">
+            <a href="https://www.youtube.com/@arabicgrafeco" target="_blank" class="social-btn youtube">
+                <i class="fa-brands fa-youtube"></i> يوتيوب القناة
+            </a>
+            <a href="https://whatsapp.com/channel/0029Vb9sl2eK5cD7Tmtodu3F" target="_blank" class="social-btn whatsapp">
+                <i class="fa-brands fa-whatsapp"></i> قناة الواتساب
+            </a>
+            <a href="https://t.me/arabicgrafeco" target="_blank" class="social-btn telegram">
+                <i class="fa-brands fa-telegram"></i> تليجرام
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const CHANNEL_ID = "UCJpMvj8tBm9E0F0Ew7i2Zqw";
+        const API_KEY = "AIzaSyAckAvV9OBbEvMvzhAqgkUhstthU-WG-z4";
+
+        let videosData = [];
+        let prevSubs = null;
+        let prevViews = null;
+        let prevLikes = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchYouTubeData(false);
+            renderIdeas();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function openFocusStudio() {
+            const overlay = document.getElementById('focusStudioOverlay');
+            const select = document.getElementById('focusScriptSelect');
+            select.innerHTML = '<option value="">-- اختر سكريبت لعرضه على الشاشة --</option>';
+            
+            ideasData.forEach((item, idx) => {
+                select.innerHTML += `<option value="${idx}">${item.title}</option>`;
+            });
+
+            overlay.style.display = 'flex';
+        }
+
+        function closeFocusStudio() {
+            document.getElementById('focusStudioOverlay').style.display = 'none';
+        }
+
+        function loadScriptToFocus() {
+            const idx = document.getElementById('focusScriptSelect').value;
+            const display = document.getElementById('focusScriptDisplay');
+            if(idx === '') {
+                display.innerText = 'اختر سكريبت من القائمة بالأعلى لتبدأ التسجيل بقراءة مريحة بدون أي تشتيت...';
+                return;
+            }
+            const scriptObj = ideasData[idx];
+            display.innerHTML = `<h2 style="color:var(--accent); margin-bottom:1rem;">${scriptObj.title}</h2><p>${scriptObj.script}</p>`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') closeFocusStudio();
+        });
+
+        async function fetchYouTubeData(isManual = false) {
+            try {
+                const channelRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
+                const channelData = await channelRes.json();
+                
+                if(channelData.items && channelData.items.length > 0) {
+                    const stats = channelData.items[0].statistics;
+                    const newSubs = Number(stats.subscriberCount);
+                    const newViews = Number(stats.viewCount);
+
+                    const uploadsPlaylistId = "UU" + CHANNEL_ID.substring(2);
+                    const playlistRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsPlaylistId}&key=${API_KEY}`);
+                    const playlistJson = await playlistRes.json();
+
+                    let newTotalLikes = 0;
+                    if(playlistJson.items && playlistJson.items.length > 0) {
+                        const videoIds = playlistJson.items.map(item => item.snippet.resourceId.videoId).join(',');
+                        const videosRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}&key=${API_KEY}`);
+                        const videosJson = await videosRes.json();
+
+                        if(videosJson.items) {
+                            videosData = videosJson.items.map(vid => ({
+                                title: vid.snippet.title,
+                                views: Number(vid.statistics.viewCount || 0),
+                                likes: Number(vid.statistics.likeCount || 0),
+                                comments: Number(vid.statistics.commentCount || 0),
+                                date: new Date(vid.snippet.publishedAt).toLocaleDateString('ar-EG')
+                            }));
+                            newTotalLikes = videosData.reduce((sum, v) => sum + v.likes, 0);
+                            renderVideos();
+                        }
+                    }
+
+                    // إذا تم النضغط يدوياً على زر التحديث، يتم حساب الفارق وإظهاره
+                    if (isManual && prevSubs !== null) {
+                        const subDiff = newSubs - prevSubs;
+                        const viewDiff = newViews - prevViews;
+                        const likeDiff = newTotalLikes - prevLikes;
+
+                        let report = "🔄 تقرير التحديث الفوري:\n\n";
+                        report += `• المشتركين: ${newSubs.toLocaleString('ar-EG')} (${subDiff >= 0 ? '+' + subDiff.toLocaleString() : subDiff.toLocaleString()})\n`;
+                        report += `• المشاهدات: ${newViews.toLocaleString('ar-EG')} (${viewDiff >= 0 ? '+' + viewDiff.toLocaleString() : viewDiff.toLocaleString()})\n`;
+                        report += `• الإعجابات: ${newTotalLikes.toLocaleString('ar-EG')} (${likeDiff >= 0 ? '+' + likeDiff.toLocaleString() : likeDiff.toLocaleString()})\n`;
+                        
+                        alert(report);
+                    } else if (isManual) {
+                        alert("✅ تم جلب وتحديث البيانات بنجاح!");
+                    }
+
+                    // حفظ القيم الحالية كقيم سابقة للمقارنة في المرة القادمة
+                    prevSubs = newSubs;
+                    prevViews = newViews;
+                    prevLikes = newTotalLikes;
+
+                    document.getElementById('statSubs').innerText = newSubs.toLocaleString('ar-EG');
+                    document.getElementById('statViews').innerText = newViews.toLocaleString('ar-EG');
+                    document.getElementById('statLikes').innerText = newTotalLikes.toLocaleString('ar-EG');
+                }
+            } catch(err) {
+                console.error("خطأ في الاتصال بيوتيوب:", err);
+                if (isManual) {
+                    alert("❌ حدث خطأ أثناء الاتصال بيوتيوب للتحديث. تأكد من اتصال الإنترنت.");
+                }
+            }
+        }
+
+        function renderVideos() {
+            const container = document.getElementById('videosListContainer');
+            container.innerHTML = '';
+            
+            if(videosData.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد فيديوهات للعرض حالياً.</p>';
+                return;
+            }
+
+            videosData.forEach(vid => {
+                container.innerHTML += `
+                    <div class="video-card-item" onclick="showVideoDetails('${vid.title.replace(/'/g, "")}', '${vid.views.toLocaleString()}', '${vid.likes.toLocaleString()}', '${vid.comments}')">
+                        <div>
+                            <strong>${vid.title}</strong>
+                            <p style="color:var(--text-muted); font-size:0.85rem;">نشر في ${vid.date} • المشاهدات: ${vid.views.toLocaleString()} • الإعجابات: ${vid.likes.toLocaleString()}</p>
+                        </div>
+                        <span class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">الإحصائيات <i class="fa-solid fa-arrow-left"></i></span>
+                    </div>
+                `;
+            });
+        }
+
+        function sortVideos() {
+            const sortBy = document.getElementById('sortSelect').value;
+            if(sortBy === 'views') {
+                videosData.sort((a, b) => b.views - a.views);
+            } else if(sortBy === 'likes') {
+                videosData.sort((a, b) => b.likes - a.likes);
+            } else if(sortBy === 'title') {
+                videosData.sort((a, b) => a.title.localeCompare(b.title, 'ar'));
+            }
+            renderVideos();
+        }
+
+        const spaceIdeas = [
+            "ماذا يحدث لو اقتربت من أفق الحدث لثقب أسود عميق؟",
+            "أرعب 3 أصوات التقطتها مركبات ناسا في أعماق الفضاء!",
+            "كوكب يدور حول نجمين وتسقط عليه أمطار من الألماس!",
+            "كيف يستطيع رائد الفضاء النوم في بيئة معدومة الجاذبية؟"
+        ];
+        function triggerSpaceSpark() {
+            const idea = spaceIdeas[Math.floor(Math.random() * spaceIdeas.length)];
+            alert('🚀 فكرة فلكية حصرية:\n\n' + idea);
+        }
+
+        function showVideoDetails(title, views, likes, comments) {
+            const card = document.getElementById('videoDetailCard');
+            card.style.display = 'block';
+            document.getElementById('detTitle').innerText = title;
+            document.getElementById('detViews').innerText = views;
+            document.getElementById('detLikes').innerText = likes;
+            document.getElementById('detComments').innerText = comments;
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        let ideasData = JSON.parse(localStorage.getItem('grafeco_ideas') || '[]');
+
+        function renderIdeas() {
+            const list = document.getElementById('ideasList');
+            if(!list) return;
+            list.innerHTML = '';
+            ideasData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.style.cssText = "background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 0.9rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;";
+                card.innerHTML = `
+                    <div>
+                        <strong>${item.title}</strong>
+                        <p style="color:var(--text-muted); font-size:0.85rem;">${item.script}</p>
+                    </div>
+                    <button style="background:transparent; border:none; color:var(--danger); cursor:pointer;" onclick="deleteIdea(${index})"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function addIdea() {
+            const title = document.getElementById('ideaTitle').value;
+            const script = document.getElementById('ideaScript').value;
+            if(!title) return alert('يرجى كتابة العنوان');
+            
+            ideasData.unshift({ title, script });
+            localStorage.setItem('grafeco_ideas', JSON.stringify(ideasData));
+            renderIdeas();
+
+            document.getElementById('ideaTitle').value = '';
+            document.getElementById('ideaScript').value = '';
+        }
+
+        function deleteIdea(index) {
+            ideasData.splice(index, 1);
+            localStorage.setItem('grafeco_ideas', JSON.stringify(ideasData));
+            renderIdea();
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ideasData));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "grafeco_backup.json");
+            dlAnchor.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    ideasData = JSON.parse(e.target.result);
+                    localStorage.setItem('grafeco_ideas', JSON.stringify(ideasData));
+                    renderIdeas();
+                    alert('تم استيراد البيانات بنجاح!');
+                } catch(err) {
+                    alert('خطأ في تنسيق الملف');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        renderIdeas();
+    </script>
+</body>
+</html>
